@@ -1,22 +1,8 @@
-import mongoose from "mongoose";
+const mongoose = require("mongoose");
 
-const { Schema } = mongoose;
-
-const favouritesSchema = new Schema({
-  userId: {
-    type: mongoose.Schema.Types.ObjectId,
-    required: true
-  },
-  favouriteItems: [
-    {
-      name: { type: String, required: true },
-      artist: { type: String, required: true },
-      trackId: { type: mongoose.Schema.Types.ObjectId, required: true }
-    }
-  ]
+const favouritesSchema = new mongoose.Schema({
+  userId: { type: String, required: true },
+  favourites: { type: [], required: true, default: [] },
 });
 
-const Favourites = mongoose.model("Favourites", favouritesSchema);
-
-export default Favourites;
-
+module.exports = mongoose.model("Favourites", favouritesSchema);

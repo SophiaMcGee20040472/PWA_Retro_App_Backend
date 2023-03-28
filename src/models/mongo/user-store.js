@@ -1,5 +1,4 @@
 import { User } from "./user.js";
-import Favourites from "./favourites.js";
 
 export const UserStore = {
   async getAll() {
@@ -9,7 +8,7 @@ export const UserStore = {
 
   async getByEmail(value) {
     if (value) {
-      const result = await User.findOne({ "email": value }).lean();
+      const result = await User.findOne({ email: value }).lean();
       return result;
     }
     return null;
@@ -17,7 +16,7 @@ export const UserStore = {
 
   async getById(value) {
     if (value) {
-      const result = await User.findOne({ "_id": value }).lean();
+      const result = await User.findOne({ _id: value }).lean();
       return result;
     }
     return null;
@@ -34,10 +33,7 @@ export const UserStore = {
 
   async updateOne(updatedObject, objectId, store) {
     const Store = selectStore(store);
-    await Store.updateOne(
-      { _id: objectId },
-      updatedObject,
-    );
+    await Store.updateOne({ _id: objectId }, updatedObject);
     const outcome = await this.getByProperty(objectId);
     return outcome;
   },
@@ -45,6 +41,7 @@ export const UserStore = {
   async deleteAll() {
     await User.deleteMany({});
   },
+  
 
   async addFavourite(userId, favouriteItemId) {
     const user = await User.findById(userId);
@@ -57,5 +54,4 @@ export const UserStore = {
 
     return user;
   },
-
-}
+};

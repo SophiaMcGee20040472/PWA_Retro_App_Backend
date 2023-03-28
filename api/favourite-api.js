@@ -1,6 +1,9 @@
-app.post("/api/users/:userId/favourites", async (req, res) => {
-    const { userId } = req.params;
-    const { trackId } = req.body;
+server.route({
+  method: "POST",
+  path: "/api/users/{userId}/favourites",
+  handler: async (request, h) => {
+    const { userId } = request.params;
+    const { trackId } = request.payload;
   
     try {
       const user = await User.findById(userId);
@@ -12,10 +15,10 @@ app.post("/api/users/:userId/favourites", async (req, res) => {
       user.favourites.push(trackId);
       await user.save();
   
-      res.send(user.favourites);
-    } catch (err) {
-      console.error(err);
-      res.status(500).send({ error: "Internal server error" });
+      return h.response(user.favourites).code(200);
+    } catch (error) {
+      console.error(error);
+      return h.response({ error: "Internal server error" }).code(500);
     }
-  });
-  
+  }
+});
