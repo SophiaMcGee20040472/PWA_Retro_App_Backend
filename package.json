@@ -1,7 +1,7 @@
 {
   "name": "backend",
   "version": "0.1.0",
-  "description": "Derived from the WIT hDip PlayTime project",
+  "description": "Retro Revival",
   "main": "src/server.js",
   "engines": {
     "node": "14.x"
