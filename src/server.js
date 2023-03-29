@@ -1,26 +1,29 @@
-import { fileURLToPath } from "url";
-import path from "path";
-import dotenv from "dotenv";
-import Joi from "joi";
-import jwt from "hapi-auth-jwt2";
-import HapiSwagger from "hapi-swagger";
-import Hapi from "@hapi/hapi";
-import Vision from "@hapi/vision";
-import Cookie from "@hapi/cookie";
-import Inert from "@hapi/inert";
-import Bell from "@hapi/bell";
-import { connectMongo } from "./models/mongo/connect.js";
-import { apiRoutes } from "./api-routes.js";
-import { User } from "./models/mongo/user.js";
+// Import necessary modules
+import { fileURLToPath } from "url"; // Provides utility function to convert a file URL to a file path
+import path from "path"; // Provides utilities for working with file and directory paths
+import dotenv from "dotenv"; // Loads environment variables from a .env file
+import Joi from "joi"; // Provides object schema validation
+import jwt from "hapi-auth-jwt2"; // Provides JWT authentication strategy for Hapi
+import HapiSwagger from "hapi-swagger"; // Generates Swagger documentation for Hapi
+import Hapi from "@hapi/hapi"; // Main Hapi framework module
+import Vision from "@hapi/vision"; // Provides templating support for Hapi
+import Cookie from "@hapi/cookie"; // Provides cookie support for Hapi
+import Inert from "@hapi/inert"; // Provides static file and directory handling for Hapi
+import Bell from "@hapi/bell"; // Provides third-party authentication support for Hapi
+import { connectMongo } from "./models/mongo/connect.js"; // Connects to a MongoDB database
+import { apiRoutes } from "./api-routes.js"; // Defines API routes
 
+// Get the file path of the current module
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
+// Load environment variables from a .env file
 const result = dotenv.config();
 if (result.error) {
   console.log(result.error.message);
 }
 
+// Options for generating Swagger documentation
 const swaggerOptions = {
   info: {
     title: "Retro API",
@@ -36,19 +39,19 @@ const swaggerOptions = {
   security: [{ jwt: [] }],
 };
 
-
+// Define the Hapi server
 async function init() {
   const server = Hapi.server({
-    port: process.env.PORT || 4000,
-    routes: { cors: true },
-    
+    port: process.env.PORT || 4000, // Set the server's port, either from an environment variable or 4000
+    routes: { cors: true }, // Enable CORS for all routes
   });
 
-  await server.register(Vision);
-  await server.register(Cookie);
-  await server.register(Inert);
-  await server.register(Bell);
-  await server.register(jwt);
+  // Register necessary plugins
+  await server.register(Vision); // Templating support
+  await server.register(Cookie); // Cookie support
+  await server.register(Inert); // Static file and directory handling
+  await server.register(Bell); // Third-party authentication
+  await server.register(jwt); // JWT authentication
   await server.register([
     Inert,
     Vision,
@@ -56,72 +59,25 @@ async function init() {
       plugin: HapiSwagger,
       options: swaggerOptions,
     },
-  ]);
-  server.validator(Joi);
+  ]); // Swagger documentation generation
+  server.validator(Joi); // Add object schema validation
 
+  // Connect to MongoDB database
   connectMongo();
+
+  // Define API routes
   server.route(apiRoutes);
-  
-  // server.route({
-  //   method: "POST",
-  //   path: "/api/users/{userId}/favourites",
-  //   handler: async (request, h) => {
-  //     const { userId } = request.params;
-  //     const { trackId } = request.payload;
-    
-  //     try {
-  //       const user = await User.findById(userId);
-    
-  //       if (!user) {
-  //         throw new Error("User not found");
-  //       }
-    
-  //       user.favourites.push(trackId);
-  //       await user.save();
-    
-  //       return h.response(user.favourites).code(200);
-  //     } catch (error) {
-  //       console.error(error);
-  //       return h.response({ error: "Internal server error" }).code(500);
-  //     }
-  //   }
-  // });
 
-  // server.route({
-  //   method: 'DELETE',
-  //   path: '/favourites/{id}',
-  //   options: {
-  //     validate: {
-  //       params: Joi.object({
-  //         id: Joi.string().required(),
-  //       }),
-  //     },
-  //   },
-  //   handler: async (request, h) => {
-  //     try {
-  //       const { id } = request.params;
-
-  //       const result = await server.methods.db.collection('favourites').findOneAndDelete({ _id: ObjectId(id) });
-        
-  //       if (!result.value) {
-  //         return h.response({ message: 'Favourite not found' }).code(404);
-  //       }
-  
-  //       return h.response({ message: 'Favourite deleted successfully' }).code(200);
-  //     } catch (error) {
-  //       console.log(error);
-  //       return h.response({ message: 'Internal Server Error' }).code(500);
-  //     }
-  //   },
-  // });
-
+  // Start the server
   await server.start();
   console.log("Server running on %s", server.info.uri);
 }
 
+// Handle unhandled rejections
 process.on("unhandledRejection", (err) => {
   console.log(err);
   process.exit(1);
 });
 
+// Initialize the server
 init();
